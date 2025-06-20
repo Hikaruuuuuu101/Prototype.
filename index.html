@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LanguaLearn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #a8c8ec 0%, #7ab8f0 50%, #4a90e2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 400px;
+            width: 100%;
+            height: 90vh;
+            max-height: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            padding: 30px 25px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #5a9fd4, #4a8bc2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            color: white;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+
+        .greeting {
+            font-size: 20px;
+            color: #34495e;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4a8bc2, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 139, 194, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #7fb3d3, #5a9fd4);
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .lesson-card:hover {
+            border-color: #4a8bc2;
+            transform: translateY(-2px);
+        }
+
+        .lesson-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .lesson-subtitle {
+            font-size: 14px;
+            color: #74838f;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #4a8bc2;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .word-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .word-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            font-size: 16px;
+            color: #2c3e50;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .word-item:hover {
+            border-color: #4a8bc2;
+            background: #f8fbff;
+        }
+
+        .speaking-container {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .feedback-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .feedback-subtitle {
+            font-size: 16px;
+            color: #34495e;
+            margin-bottom: 40px;
+        }
+
+        .mic-btn {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #5a9fd4, #4a8bc2);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(74, 139, 194, 0.3);
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(74, 139, 194, 0.4);
+        }
+
+        .mic-btn.recording {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            animation: pulse 1.5s infinite;
+        }
+
+        .mic-instructions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #5a6c7d;
+            border-left: 4px solid #4a8bc2;
+        }
+
+        .recognition-result {
+            min-height: 60px;
+            background: #f1f3f4;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #2c3e50;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .mic-icon {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .progress-btn {
+            background: transparent;
+            border: 2px solid #4a8bc2;
+            color: #4a8bc2;
+        }
+
+        .progress-btn:hover {
+            background: #4a8bc2;
+            color: white;
+        }
+
+        .user-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ecf0f1;
+            border: 2px solid #4a8bc2;
+            cursor: pointer;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #74838f;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome-screen">
+            <div class="user-icon"></div>
+            <div class="header">
+                <div class="logo">📚</div>
+                <h1 class="app-title">LanguaLearn</h1>
+            </div>
+            <button class="btn" onclick="showScreen('home-screen')">Get Started</button>
+        </div>
+
+        <!-- Home Screen -->
+        <div class="screen" id="home-screen">
+            <div class="user-icon"></div>
+            <div class="greeting">Good afternoon</div>
+            
+            <div class="lesson-card" onclick="showScreen('greetings-screen')">
+                <div class="lesson-title">Continue Lesson</div>
+                <div class="lesson-subtitle">Greetings • Beginner</div>
+            </div>
+
+            <h3 style="margin: 30px 0 20px; color: #2c3e50;">Lessons</h3>
+            
+            <div class="lesson-card" onclick="showScreen('vocabulary-screen')">
+                <div class="lesson-title">Vocabulary</div>
+            </div>
+            
+            <div class="lesson-card" onclick="showScreen('grammar-screen')">
+                <div class="lesson-title">Grammar</div>
+            </div>
+            
+            <div class="lesson-card" onclick="showScreen('conversation-screen')">
+                <div class="lesson-title">Conversation</div>
+            </div>
+
+            <button class="btn progress-btn" onclick="showProgress()">View Progress</button>
+        </div>
+
+        <!-- Greetings Screen -->
+        <div class="screen" id="greetings-screen">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div style="margin-top: 40px;">
+                <h2 class="section-title">Greetings</h2>
+                <p class="section-subtitle">Beginner</p>
+                
+                <div class="word-list">
+                    <div class="word-item" onclick="practiceWord('Hello!')">Hello!</div>
+                    <div class="word-item" onclick="practiceWord('Good morning')">Good morning</div>
+                    <div class="word-item" onclick="practiceWord('Good afternoon')">Good afternoon</div>
+                    <div class="word-item" onclick="practiceWord('Good evening')">Good evening</div>
+                    <div class="word-item" onclick="practiceWord('Thank you')">Thank you</div>
+                    <div class="word-item" onclick="practiceWord('You are welcome')">You are welcome</div>
+                    <div class="word-item" onclick="practiceWord('How are you?')">How are you?</div>
+                    <div class="word-item" onclick="practiceWord('I am fine')">I am fine</div>
+                    <div class="word-item" onclick="practiceWord('Nice to meet you')">Nice to meet you</div>
+                    <div class="word-item" onclick="practiceWord('See you later')">See you later</div>
+                    <div class="word-item" onclick="practiceWord('Goodbye')">Goodbye</div>
+                    <div class="word-item" onclick="practiceWord('Have a great day')">Have a great day</div>
+                </div>
+
+                <button class="btn progress-btn" onclick="showProgress()">View Progress</button>
+            </div>
+        </div>
+
+        <!-- Vocabulary Screen -->
+        <div class="screen" id="vocabulary-screen">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div style="margin-top: 40px;">
+                <h2 class="section-title">Vocabulary</h2>
+                <p class="section-subtitle">Essential Words</p>
+                
+                <div class="word-list">
+                    <div class="word-item" onclick="practiceWord('Family')">Family</div>
+                    <div class="word-item" onclick="practiceWord('House')">House</div>
+                    <div class="word-item" onclick="practiceWord('School')">School</div>
+                    <div class="word-item" onclick="practiceWord('Work')">Work</div>
+                    <div class="word-item" onclick="practiceWord('Food')">Food</div>
+                    <div class="word-item" onclick="practiceWord('Water')">Water</div>
+                    <div class="word-item" onclick="practiceWord('Time')">Time</div>
+                    <div class="word-item" onclick="practiceWord('Money')">Money</div>
+                    <div class="word-item" onclick="practiceWord('Friend')">Friend</div>
+                    <div class="word-item" onclick="practiceWord('Love')">Love</div>
+                    <div class="word-item" onclick="practiceWord('Happy')">Happy</div>
+                    <div class="word-item" onclick="practiceWord('Beautiful')">Beautiful</div>
+                    <div class="word-item" onclick="practiceWord('Important')">Important</div>
+                    <div class="word-item" onclick="practiceWord('Different')">Different</div>
+                    <div class="word-item" onclick="practiceWord('Interesting')">Interesting</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grammar Screen -->
+        <div class="screen" id="grammar-screen">
+            <button class="back-btn" onclick="showScreen('home-school')">←</button>
+            <div style="margin-top: 40px;">
+                <h2 class="section-title">Grammar</h2>
+                <p class="section-subtitle">Basic Grammar Rules</p>
+                
+                <div class="word-list">
+                    <div class="word-item" onclick="practiceWord('I am a student')">I am a student</div>
+                    <div class="word-item" onclick="practiceWord('You are my friend')">You are my friend</div>
+                    <div class="word-item" onclick="practiceWord('He is tall')">He is tall</div>
+                    <div class="word-item" onclick="practiceWord('She is beautiful')">She is beautiful</div>
+                    <div class="word-item" onclick="practiceWord('We are happy')">We are happy</div>
+                    <div class="word-item" onclick="practiceWord('They are learning')">They are learning</div>
+                    <div class="word-item" onclick="practiceWord('This is my book')">This is my book</div>
+                    <div class="word-item" onclick="practiceWord('That is your pen')">That is your pen</div>
+                    <div class="word-item" onclick="practiceWord('I have a cat')">I have a cat</div>
+                    <div class="word-item" onclick="practiceWord('Do you like coffee?')">Do you like coffee?</div>
+                    <div class="word-item" onclick="practiceWord('Where are you from?')">Where are you from?</div>
+                    <div class="word-item" onclick="practiceWord('What is your name?')">What is your name?</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Screen -->
+        <div class="screen" id="conversation-screen">
+            <button class="back-btn" onclick="showScreen('home-screen')">←</button>
+            <div style="margin-top: 40px;">
+                <h2 class="section-title">Conversation</h2>
+                <p class="section-subtitle">Practice Speaking</p>
+                
+                <div class="word-list">
+                    <div class="word-item" onclick="practiceWord('Can you help me?')">Can you help me?</div>
+                    <div class="word-item" onclick="practiceWord('Where is the bathroom?')">Where is the bathroom?</div>
+                    <div class="word-item" onclick="practiceWord('How much does this cost?')">How much does this cost?</div>
+                    <div class="word-item" onclick="practiceWord('I would like to order')">I would like to order</div>
+                    <div class="word-item" onclick="practiceWord('Excuse me, do you speak English?')">Excuse me, do you speak English?</div>
+                    <div class="word-item" onclick="practiceWord('Could you repeat that please?')">Could you repeat that please?</div>
+                    <div class="word-item" onclick="practiceWord('I do not understand')">I do not understand</div>
+                    <div class="word-item" onclick="practiceWord('Can you speak slowly?')">Can you speak slowly?</div>
+                    <div class="word-item" onclick="practiceWord('What time is it?')">What time is it?</div>
+                    <div class="word-item" onclick="practiceWord('How do I get to the station?')">How do I get to the station?</div>
+                    <div class="word-item" onclick="practiceWord('I am lost, can you help?')">I am lost, can you help?</div>
+                    <div class="word-item" onclick="practiceWord('Thank you for your help')">Thank you for your help</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Speaking Practice Screen -->
+        <div class="screen" id="speaking-screen">
+            <button class="back-btn" onclick="goBack()">←</button>
+            <div class="speaking-container">
+                <div class="feedback-text" id="feedback-text">Practice Speaking</div>
+                <div class="feedback-subtitle" id="practice-word">Click the microphone to start</div>
+                
+                <div class="mic-instructions">
+                    💡 <strong>Instructions:</strong><br>
+                    1. Click the microphone button<br>
+                    2. Allow microphone access if prompted<br>
+                    3. Speak clearly when the button turns red<br>
+                    4. Wait for feedback
+                </div>
+                
+                <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">
+                    <svg class="mic-icon" viewBox="0 0 24 24">
+                        <path d="M12 2C13.1 2 14 2.9 14 4V10C14 11.1 13.1 12 12 12C10.9 12 10 11.1 10 10V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.9 15.9 19 12 19C8.1 19 5 15.9 5 12V10H7V12C7 14.8 9.2 17 12 17C14.8 17 17 14.8 17 12V10H19ZM12 22H14V20H10V22H12Z"/>
+                    </svg>
+                </button>
+                
+                <div class="recognition-result" id="recognition-result">Ready to practice! Click the microphone above.</div>
+                
+                <button class="btn" onclick="tryAgain()">Try Again</button>
+                <button class="btn btn-secondary" onclick="skipSpeech()">Skip Speech Practice</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 'welcome-screen';
+        let previousScreen = '';
+        let currentPracticeWord = '';
+        let isRecording = false;
+        let recognition = null;
+
+        // Initialize speech recognition with better error handling
+        function initializeSpeechRecognition() {
+            try {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    recognition = new SpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = 'en-US';
+
+                    recognition.onstart = function() {
+                        console.log('Speech recognition started');
+                        document.getElementById('recognition-result').textContent = '🎤 Listening... Please speak now!';
+                    };
+
+                    recognition.onresult = function(event) {
+                        if (event.results.length > 0) {
+                            const result = event.results[0][0].transcript.trim();
+                            document.getElementById('recognition-result').textContent = `You said: "${result}"`;
+                            
+                            // Simple feedback logic
+                            if (result.toLowerCase().includes(currentPracticeWord.toLowerCase()) || 
+                                similarity(result.toLowerCase(), currentPracticeWord.toLowerCase()) > 0.5) {
+                                document.getElementById('feedback-text').textContent = 'Correct! 🎉';
+                                document.getElementById('feedback-text').style.color = '#27ae60';
+                            } else {
+                                document.getElementById('feedback-text').textContent = 'Try Again! 🔄';
+                                document.getElementById('feedback-text').style.color = '#e74c3c';
+                            }
+                        }
+                        stopRecording();
+                    };
+
+                    recognition.onerror = function(event) {
+                        console.error('Speech recognition error:', event.error);
+                        let errorMessage = '';
+                        let instructions = '';
+                        
+                        switch(event.error) {
+                            case 'network':
+                                errorMessage = '🌐 Network Error';
+                                instructions = 'Please check your internet connection and try again.';
+                                break;
+                            case 'not-allowed':
+                                errorMessage = '🎤 Microphone Access Denied';
+                                instructions = 'Please click the microphone icon in your browser address bar and allow access, then refresh the page.';
+                                break;
+                            case 'no-speech':
+                                errorMessage = '🔇 No Speech Detected';
+                                instructions = 'Please speak more clearly and try again.';
+                                break;
+                            case 'aborted':
+                                errorMessage = '⏹️ Recording Stopped';
+                                instructions = 'Recording was stopped. Click the microphone to try again.';
+                                break;
+                            case 'audio-capture':
+                                errorMessage = '🎤 Microphone Problem';
+                                instructions = 'Please check if your microphone is working and not being used by another app.';
+                                break;
+                            default:
+                                errorMessage = '❌ Speech Recognition Error';
+                                instructions = 'Please try again or use a supported browser (Chrome/Edge recommended).';
+                        }
+                        
+                        document.getElementById('recognition-result').textContent = errorMessage + '\n' + instructions;
+                        document.getElementById('feedback-text').textContent = 'Ready to Try Again';
+                        document.getElementById('feedback-text').style.color = '#3498db';
+                        stopRecording();
+                    };
+
+                    recognition.onend = function() {
+                        console.log('Speech recognition ended');
+                        stopRecording();
+                    };
+                } else {
+                    console.log('Speech recognition not supported');
+                    recognition = null;
+                }
+            } catch (error) {
+                console.error('Error initializing speech recognition:', error);
+                recognition = null;
+            }
+        }
+
+        // Request microphone permission first
+        async function requestMicrophonePermission() {
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    // Stop the stream immediately, we just needed permission
+                    stream.getTracks().forEach(track => track.stop());
+                    return true;
+                }
+            } catch (error) {
+                console.error('Microphone permission error:', error);
+                return false;
+            }
+            return false;
+        }
+
+        // Initialize speech recognition when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSpeechRecognition();
+        });
+
+        function showScreen(screenId) {
+            previousScreen = currentScreen;
+            currentScreen = screenId;
+            
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+            
+            // Show target screen
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goBack() {
+            if (previousScreen) {
+                showScreen(previousScreen);
+            } else {
+                showScreen('home-screen');
+            }
+        }
+
+        function practiceWord(word) {
+            currentPracticeWord = word;
+            document.getElementById('practice-word').textContent = `Say: "${word}"`;
+            document.getElementById('feedback-text').textContent = 'Practice Speaking';
+            document.getElementById('feedback-text').style.color = '#2c3e50';
+            document.getElementById('recognition-result').textContent = '';
+            showScreen('speaking-screen');
+        }
+
+        async function toggleRecording() {
+            if (!recognition) {
+                // Fallback for browsers without speech recognition
+                document.getElementById('recognition-result').textContent = 
+                    '🌐 Speech recognition not supported.\n\nPlease use Chrome, Edge, or Safari for speech features.\n\nFor now, enjoy practicing by reading the words!';
+                
+                // Simulate feedback for demo purposes
+                setTimeout(() => {
+                    document.getElementById('feedback-text').textContent = 'Keep Practicing! 📚';
+                    document.getElementById('feedback-text').style.color = '#27ae60';
+                }, 1000);
+                return;
+            }
+
+            if (isRecording) {
+                stopRecording();
+                return;
+            }
+
+            // Request microphone permission first
+            const hasPermission = await requestMicrophonePermission();
+            if (!hasPermission) {
+                document.getElementById('recognition-result').textContent = 
+                    '🎤 Microphone Permission Required\n\n' +
+                    '1. Click the microphone icon in your browser address bar\n' +
+                    '2. Select "Allow" for microphone access\n' +
+                    '3. Refresh the page and try again\n\n' +
+                    'Or check your browser settings for microphone permissions.';
+                return;
+            }
+
+            startRecording();
+        }
+
+        async function startRecording() {
+            try {
+                isRecording = true;
+                document.getElementById('mic-btn').classList.add('recording');
+                document.getElementById('recognition-result').textContent = '🎤 Click and start speaking...';
+                document.getElementById('feedback-text').textContent = 'Preparing...';
+                document.getElementById('feedback-text').style.color = '#3498db';
+                
+                // Small delay to show visual feedback
+                setTimeout(() => {
+                    try {
+                        recognition.start();
+                    } catch (error) {
+                        console.error('Error starting recognition:', error);
+                        document.getElementById('recognition-result').textContent = 
+                            '❌ Could not start speech recognition.\n\nPlease try refreshing the page or check microphone permissions.';
+                        stopRecording();
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                document.getElementById('recognition-result').textContent = 
+                    '❌ Error starting microphone.\n\nPlease check your microphone is connected and not being used by another app.';
+                stopRecording();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            document.getElementById('mic-btn').classList.remove('recording');
+            if (recognition) {
+                try {
+                    recognition.stop();
+                } catch (error) {
+                    console.error('Error stopping recognition:', error);
+                }
+            }
+        }
+
+        function tryAgain() {
+            document.getElementById('feedback-text').textContent = 'Practice Speaking';
+            document.getElementById('feedback-text').style.color = '#2c3e50';
+            document.getElementById('recognition-result').textContent = 'Ready to practice! Click the microphone above.';
+        }
+
+        function skipSpeech() {
+            document.getElementById('feedback-text').textContent = 'Great Practice! 🎉';
+            document.getElementById('feedback-text').style.color = '#27ae60';
+            document.getElementById('recognition-result').textContent = `You practiced: "${currentPracticeWord}"\n\nKeep learning! Speech recognition helps improve pronunciation.`;
+        }
+
+        function showProgress() {
+            // Create a simple progress modal
+            const progressData = {
+                wordsLearned: 45,
+                lessonsCompleted: 8,
+                speakingAccuracy: 85,
+                streakDays: 12
+            };
+            
+            const message = `📊 Your Learning Progress\n\n` +
+                           `📚 Words Learned: ${progressData.wordsLearned}\n` +
+                           `✅ Lessons Completed: ${progressData.lessonsCompleted}\n` +
+                           `🎤 Speaking Accuracy: ${progressData.speakingAccuracy}%\n` +
+                           `🔥 Learning Streak: ${progressData.streakDays} days\n\n` +
+                           `Keep up the great work!`;
+            
+            alert(message);
+        }
+
+        // Simple string similarity function
+        function similarity(s1, s2) {
+            let longer = s1;
+            let shorter = s2;
+            if (s1.length < s2.length) {
+                longer = s2;
+                shorter = s1;
+            }
+            const editDistance = levenshteinDistance(longer, shorter);
+            return (longer.length - editDistance) / longer.length;
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click animations to buttons
+            const buttons = document.querySelectorAll('.btn, .lesson-card, .word-item');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
